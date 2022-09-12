@@ -36,4 +36,11 @@ export function sendInfoRefs(
 
   process.stdout.on("data", (chunk) => reply.raw.write(chunk));
   process.stdout.on("close", () => reply.raw.end());
+  process.on("error", (err) =>
+    reply.status(500).send({
+      message: err.message,
+      error: "Cannot send info refs",
+      statusCode: 500,
+    }),
+  );
 }

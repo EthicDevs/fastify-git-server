@@ -1,10 +1,10 @@
 {
-  "name": "@ethicdevs/typescript-library-starter",
+  "name": "@ethicdevs/fastify-git-server",
   "version": "0.1.0",
-  "description": "Template repository for TypeScript libraries",
+  "description": "A Fastify plugin to easily make one/many Git repositories available for clone/fetch/push.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "author": {
     "name": "EthicDevs",
     "email": "contact@ethicdevs.com",
@@ -12,12 +12,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ethicdevs/typescript-library-starter"
+    "url": "https://github.com/ethicdevs/fastify-git-server"
   },
   "keywords": [
+    "fastify",
+    "plugin",
+    "git",
+    "server",
+    "pre-handler",
     "typescript",
-    "library",
-    "template"
+    "library"
   ],
   "publishConfig": {
     "access": "public"
@@ -58,7 +62,10 @@
   },
   "jest": {
     "preset": "ts-jest/presets/js-with-ts",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "testPathIgnorePatterns": [
+      "!tests/__fixtures/*"
+    ]
   },
   "eslintConfig": {
     "extends": [
