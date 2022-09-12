@@ -135,11 +135,10 @@ const gitServerPluginAsync: FastifyPluginAsync<GitServer.PluginOptions> =
             logInfo(
               `[git] sending info refs response for request "${request.id}"...`,
             );
-            reply.header(
-              "Content-Type",
-              `application/x-git-${packType}-advertisement`,
-            );
-            sendInfoRefs(
+            reply.raw.writeHead(200, "OK", {
+              "content-type": `application/x-git-${packType}-advertisement`,
+            });
+            await sendInfoRefs(
               opts,
               packType,
               repoResult.gitRepositoryDir,
@@ -152,11 +151,10 @@ const gitServerPluginAsync: FastifyPluginAsync<GitServer.PluginOptions> =
             logInfo(
               `[git] sending stateless rpc response for request "${request.id}"...`,
             );
-            reply.header(
-              "Content-Type",
-              `application/x-git-${packType}-result`,
-            );
-            sendStatelessRpc(
+            reply.raw.writeHead(200, "OK", {
+              "content-type": `application/x-git-${packType}-result`,
+            });
+            await sendStatelessRpc(
               opts,
               packType,
               repoResult.gitRepositoryDir,

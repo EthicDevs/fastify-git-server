@@ -1,6 +1,7 @@
 .github/
 .volumes/
 coverage/
+examples/
 tests/
 .env
 **/*.test.ts

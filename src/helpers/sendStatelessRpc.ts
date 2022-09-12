@@ -16,11 +16,13 @@ export function sendStatelessRpc(
   request: FastifyRequest,
   gitStream: stream.PassThrough,
 ) {
-  const safePackType = safeServiceToPackType(packType);
-  const process = spawnGit(opts, [safePackType, GIT_STATELESS_RPC_FLAG], cwd);
+  return new Promise((resolve) => {
+    const safePackType = safeServiceToPackType(packType);
+    const process = spawnGit(opts, [safePackType, GIT_STATELESS_RPC_FLAG], cwd);
 
-  request.raw.pipe(process.stdin, { end: false });
+    request.raw.pipe(process.stdin, { end: false });
 
-  process.stdout.on("data", (chunk) => gitStream.write(chunk));
-  process.stdout.on("close", () => gitStream.end());
+    process.stdout.on("data", (chunk) => gitStream.write(chunk));
+    process.stdout.on("close", () => resolve(gitStream.end()));
+  });
 }
