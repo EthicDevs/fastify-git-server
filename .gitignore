@@ -1,8 +1,9 @@
 !.env
 .env.*
 .DS_Store
+*.log
 .volumes/
 dist/
+coverage/
 node_modules/
 yarn-error.log
-*.log

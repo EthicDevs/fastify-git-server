@@ -1,6 +1,9 @@
-**/*.test.ts
-tsconfig.json
-nodemon.json
-.env
+.github/
 .volumes/
+coverage/
+tests/
+.env
+**/*.test.ts
+nodemon.json
+tsconfig.json
 yarn-error.log

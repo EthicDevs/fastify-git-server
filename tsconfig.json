@@ -44,11 +44,12 @@
   },
   "exclude": [
     "./.git",
-    "./example",
     "./dist",
     "./docs",
+    "./example",
     "./node_modules",
     "./src/**/*.test.ts",
+    "./tests",
     "**/node_modules/**"
   ]
 }
