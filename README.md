@@ -17,7 +17,62 @@ $ npm i @ethicdevs/fastify-git-server
 
 ## Usage
 
-## Configuration
+```ts
+// server.ts
+import fastify from "fastify";
+import fastifyGitServer, { GitServer } from "@ethicdevs/fastify-git-server";
+
+(function main() {
+  const server = fastify();
+
+  server.register(fastifyGitServer, {
+    // can be set to a path to git, else will directly call "git" from $PATH.
+    gitExecutablePath: undefined,
+    // a method to authorise the fact that the user can fetch/push, or not.
+    authorize(repoSlug: string, credentials: GitServer.AuthCredentials) {
+      if (repoSlug.toLowerCase() === "testorg/test-repo") {
+        return cred.username === "test" && cred.password === "test";
+      }
+      return false;
+    },
+    // a method to resolve the repository directory on disk and its authorisation mode.
+    repositoryResolver(
+      repoSlug: string,
+    ): PromiseLike<GitServer.RepositoryResolverResult> {
+      return {
+        authMode: GitServer.AuthMode.ALWAYS, // or PUSH_ONLY, or NEVER.
+        gitRepositoryDir: resolve(
+          "/home/git-server-user/repos/testorg/test-repo",
+        ),
+      };
+    },
+  });
+
+  server.listen("localhost", 4200, () => {
+    console.log(`Server is up and running at http://localhost:4200`);
+  });
+})();
+```
+
+Run the server like so (or build/bundle it first), and enjoy!
+
+```sh
+$ ts-node server.ts
+# Server is up and running at http://localhost:4200
+```
+
+Now you can easily git clone/fetch/push to the repository assuming you pass the
+right credentials set for the right repository.
+
+```sh
+$ git clone http://localhost:4200/testorg/test-repo.git
+$ cd test-repo/
+$ git fetch
+$ git pull --rebase
+$ echo "Today is: $(date)" >> ReadMe.md
+$ git commit -am 'docs(readme): add the date of today'
+$ git push
+```
 
 ## License
 
