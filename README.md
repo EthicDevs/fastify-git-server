@@ -112,6 +112,15 @@ $ yarn build
 $ yarn typecheck # same but does not write to ./dist folder (only check types)
 ```
 
+## Credits
+
+This library is a port of [git-express](https://github.com/MWGuy/git-express),
+aimed at Fastify v3.x+. Original lib' has not received any update for more than
+2 years now and has been released without any license...
+
+It was a great source of inspiration for this library to be born, so thanks to
+the author for that piece of code! 😅
+
 ## License
 
 The [MIT](/LICENSE) license.
