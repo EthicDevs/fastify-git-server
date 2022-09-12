@@ -30,19 +30,12 @@ const gitServerPluginAsync: FastifyPluginAsync<GitServer.PluginOptions> =
           logTrace("request.url:", request.url);
 
           const { service } = request.query as { service?: string };
-          const packType = getPackType(service);
           const requestMethod = request.method.toUpperCase();
+          let packType = getPackType(service);
 
           logTrace("service:", service);
           logTrace("packType:", packType);
           logTrace("requestMethod:", requestMethod);
-
-          if (packType == null) {
-            logWarn(
-              `[git] pack type is set to null for request "${request.id}"...`,
-            );
-            return reply.status(400).send();
-          }
 
           const pathname = request.url.split("?")[0];
           const pathMatches = GIT_PATH_REGEXP.exec(pathname);
@@ -66,6 +59,17 @@ const gitServerPluginAsync: FastifyPluginAsync<GitServer.PluginOptions> =
           const repoSlug = `${org}/${repo}`;
           logTrace("requestType:", requestType);
           logTrace("repoSlug:", repoSlug);
+
+          if (packType == null) {
+            packType = getPackType(requestType);
+          }
+
+          if (packType == null) {
+            logWarn(
+              `[git] pack type is set to null for request "${request.id}"...`,
+            );
+            return reply.status(400).send();
+          }
 
           if (SUPPORTED_GIT_REQUEST_TYPES.includes(requestType) === false) {
             logWarn(
