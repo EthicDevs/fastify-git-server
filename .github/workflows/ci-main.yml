@@ -1,0 +1,48 @@
+name: ci-main
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  ci-main:
+    name: "🏗 Continuous Integration"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "⚙️ Checkout repository"
+        uses: actions/checkout@v3
+      - name: "⚙️ Setup Node.JS (16.x)"
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16.x"
+      - name: "⚙️ Get Yarn cache folder path"
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+      - name: "⚙️ Cache Yarn cache folder"
+        uses: actions/cache@v3
+        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+      - name: "⚙️ Cache node_modules folder"
+        uses: actions/cache@v3
+        id: node-modules-cache # use this to check for `cache-hit` (`steps.node-modules-cache.outputs.cache-hit != 'true'`)
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-${{ matrix.node-version }}-nodemodules-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.node-version }}-nodemodules-
+      - name: "⚙️ Install dependencies via yarn"
+        if: |
+          steps.yarn-cache.outputs.cache-hit != 'true' ||
+          steps.node-modules-cache.outputs.cache-hit != 'true'
+        run: "yarn"
+      - name: "🧪 Run tests / verify code coverage"
+        uses: ArtiomTr/jest-coverage-report-action@v2
+        with:
+          package-manager: yarn
+          skip-step: install
+      - name: "🔩 Type check & build code"
+        run: "yarn build"
