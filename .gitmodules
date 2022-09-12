@@ -1,0 +1,3 @@
+[submodule "tests/__fixtures__/test-git-repo-001"]
+	path = tests/__fixtures__/test-git-repo-001
+	url = git@github.com:EthicDevs/fastify-git-server-test-repo.git
