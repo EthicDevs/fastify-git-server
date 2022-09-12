@@ -20,7 +20,8 @@ $ npm i @ethicdevs/fastify-git-server
 ```ts
 // server.ts
 import fastify from "fastify";
-import fastifyGitServer, { GitServer } from "@ethicdevs/fastify-git-server";
+import { resolve } from "node:path";
+import fastifyGitServer, { GitServer } from "..";
 
 (function main() {
   const server = fastify();
@@ -29,16 +30,19 @@ import fastifyGitServer, { GitServer } from "@ethicdevs/fastify-git-server";
     // can be set to a path to git, else will directly call "git" from $PATH.
     gitExecutablePath: undefined,
     // a method to authorise the fact that the user can fetch/push, or not.
-    authorize(repoSlug: string, credentials: GitServer.AuthCredentials) {
+    async authorize(repoSlug, credentials) {
       if (repoSlug.toLowerCase() === "testorg/test-repo") {
-        return cred.username === "test" && cred.password === "test";
+        return (
+          credentials.username === "test" && credentials.password === "test"
+        );
       }
       return false;
     },
     // a method to resolve the repository directory on disk and its authorisation mode.
-    repositoryResolver(
-      repoSlug: string,
-    ): PromiseLike<GitServer.RepositoryResolverResult> {
+    async repositoryResolver(repoSlug) {
+      if (repoSlug !== "testorg/test-repo") {
+        throw new Error("Cannot find such repository.");
+      }
       return {
         authMode: GitServer.AuthMode.ALWAYS, // or PUSH_ONLY, or NEVER.
         gitRepositoryDir: resolve(
@@ -48,7 +52,7 @@ import fastifyGitServer, { GitServer } from "@ethicdevs/fastify-git-server";
     },
   });
 
-  server.listen("localhost", 4200, () => {
+  server.listen("localhost", "4200", () => {
     console.log(`Server is up and running at http://localhost:4200`);
   });
 })();
