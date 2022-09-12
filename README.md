@@ -2,8 +2,9 @@
 
 [![NPM](https://img.shields.io/npm/v/@ethicdevs/fastify-git-server?color=red)](https://www.npmjs.com/@ethicdevs/fastify-git-server)
 [![MIT License](https://img.shields.io/github/license/ethicdevs/fastify-git-server.svg?color=blue)](https://github.com/ethicdevs/fastify-git-server/blob/master/LICENSE)
-[![Average issue resolution time](https://isitmaintained.com/badge/resolution/ethicdevs/fastify-git-server.svg)](https://isitmaintained.com/project/ethicdevs/fastify-git-server)
-[![Number of open issues](https://isitmaintained.com/badge/open/ethicdevs/fastify-git-server.svg)](https://isitmaintained.com/project/ethicdevs/fastify-git-server)
+[![ci-main](https://github.com/EthicDevs/fastify-git-server/actions/workflows/ci-main.yml/badge.svg)](https://github.com/EthicDevs/fastify-git-server/actions/workflows/ci-main.yml)
+[![Average issue resolution time](https://isitmaintained.com/badge/resolution/ethicdevs/fastify-git-server.svg?v1.0.0)](https://isitmaintained.com/project/ethicdevs/fastify-git-server)
+[![Number of open issues](https://isitmaintained.com/badge/open/ethicdevs/fastify-git-server.svg?v1.0.0)](https://isitmaintained.com/project/ethicdevs/fastify-git-server)
 
 A Fastify plugin to easily make one/many Git repositories available for clone/fetch/push.
 
