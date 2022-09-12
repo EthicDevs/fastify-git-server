@@ -317,6 +317,8 @@ describe("@ethicdevs/fastify-git-server", () => {
 "001e# service=git-upload-pack
 0000010b510e5f56d777c059c2eb1bc037347b6d4f8d14b1 HEAD multi_ack thin-pack side-band side-band-64k ofs-delta shallow deepen-since deepen-not deepen-relative no-progress include-tag multi_ack_detailed no-done symref=HEAD:refs/heads/main object-format=sha1 agent=git/2.35.1
 003d510e5f56d777c059c2eb1bc037347b6d4f8d14b1 refs/heads/main
+0046510e5f56d777c059c2eb1bc037347b6d4f8d14b1 refs/remotes/origin/HEAD
+0046510e5f56d777c059c2eb1bc037347b6d4f8d14b1 refs/remotes/origin/main
 0000"
 `);
   });
@@ -358,6 +360,8 @@ describe("@ethicdevs/fastify-git-server", () => {
     expect(response.body).toMatchInlineSnapshot(`
 "001f# service=git-receive-pack
 000000b1510e5f56d777c059c2eb1bc037347b6d4f8d14b1 refs/heads/main report-status report-status-v2 delete-refs side-band-64k quiet atomic ofs-delta object-format=sha1 agent=git/2.35.1
+0046510e5f56d777c059c2eb1bc037347b6d4f8d14b1 refs/remotes/origin/HEAD
+0046510e5f56d777c059c2eb1bc037347b6d4f8d14b1 refs/remotes/origin/main
 0000"
 `);
   });
