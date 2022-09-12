@@ -19,11 +19,17 @@ $ npm i @ethicdevs/fastify-git-server
 
 ```ts
 // server.ts
-import fastify from "fastify";
+// std
 import { resolve } from "node:path";
-import fastifyGitServer, { GitServer } from "..";
+// 3rd-party
+import fastify from "fastify";
+// app
+import fastifyGitServer, { GitServer } from "@ethicdevs/fastify-git-server";
 
-(function main() {
+const HOST = process.env.HOST || "localhost";
+const PORT = process.env.PORT != null ? parseInt(process.env.PORT, 10) : 4200;
+
+async function main() {
   const server = fastify();
 
   server.register(fastifyGitServer, {
@@ -52,10 +58,18 @@ import fastifyGitServer, { GitServer } from "..";
     },
   });
 
-  server.listen("localhost", "4200", () => {
-    console.log(`Server is up and running at http://localhost:4200`);
+  server.listen(PORT, HOST, (err, listeningOnUrl) => {
+    if (err != null) {
+      console.error(`❌ Could not start server. Error: ${err.message}`);
+    } else {
+      console.log(`🚀 Server is up and running at: ${listeningOnUrl}`);
+    }
   });
-})();
+
+  return server;
+}
+
+main();
 ```
 
 Run the server like so (or build/bundle it first), and enjoy!
