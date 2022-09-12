@@ -18,7 +18,7 @@ const sleep = (time: number = 100) =>
     }, time);
   });
 
-jest.setTimeout(15000);
+jest.setTimeout(20000);
 
 describe("@ethicdevs/fastify-git-server", () => {
   let app: FastifyInstance<
@@ -130,6 +130,127 @@ describe("@ethicdevs/fastify-git-server", () => {
     expect(response.body).toMatchInlineSnapshot(`""`);
   });
 
+  it(`should reply with 400 and return empty when a bad requestType is received and no "?service=" query param is passed`, async () => {
+    // Given
+    // the fastifyGitServerPlugin has been registered
+    app.register(fastifyGitServerPlugin, {
+      async authorize(_repoSlug, _cred) {
+        return false;
+      },
+      async repositoryResolver(_repoSlug) {
+        return {
+          authMode: GitServer.AuthMode.PUSH_ONLY,
+          gitRepositoryDir: resolve(
+            join(__dirname, "__fixtures__", "test-git-repo-001"),
+          ),
+        };
+      },
+    });
+
+    // When
+    // a request with a bad requestType is made
+    const response = await app.inject({
+      remoteAddress: "localhost",
+      method: "GET",
+      url: "/org/repo.git/bad-request-type",
+    });
+
+    // Then
+    expect(response.statusCode).toStrictEqual(400);
+    expect(response.body).toMatchInlineSnapshot(`""`);
+  });
+
+  it(`should reply with 400 and return empty when a bad method is requested with a valid .git path`, async () => {
+    // Given
+    // the fastifyGitServerPlugin has been registered
+    app.register(fastifyGitServerPlugin, {
+      async authorize(_repoSlug, _cred) {
+        return false;
+      },
+      async repositoryResolver(_repoSlug) {
+        return {
+          authMode: GitServer.AuthMode.PUSH_ONLY,
+          gitRepositoryDir: resolve(
+            join(__dirname, "__fixtures__", "test-git-repo-001"),
+          ),
+        };
+      },
+    });
+
+    // When
+    // a request with a bad requestType is made
+    const response = await app.inject({
+      remoteAddress: "localhost",
+      method: "PUT",
+      url: "/org/repo.git/info/refs?service=git-upload-pack",
+    });
+
+    // Then
+    expect(response.statusCode).toStrictEqual(400);
+    expect(response.body).toMatchInlineSnapshot(`""`);
+  });
+
+  it(`should reply with 500 and return empty when the "options.authorize" function throws`, async () => {
+    // Given
+    // the fastifyGitServerPlugin has been registered
+    app.register(fastifyGitServerPlugin, {
+      async authorize(_repoSlug, _cred) {
+        throw new Error("Test error");
+      },
+      async repositoryResolver(_repoSlug) {
+        return {
+          authMode: GitServer.AuthMode.ALWAYS,
+          gitRepositoryDir: resolve(
+            join(__dirname, "__fixtures__", "test-git-repo-001"),
+          ),
+        };
+      },
+    });
+
+    // When
+    // a request with a bad requestType is made
+    const response = await app.inject({
+      remoteAddress: "localhost",
+      method: "GET",
+      url: "/org/repo.git/info/refs?service=git-upload-pack",
+      headers: {
+        authorization: "Basic dGVzdDp0ZXN0", // "test:test" base64-ized
+      },
+    });
+
+    // Then
+    expect(response.statusCode).toStrictEqual(500);
+    expect(response.body).toMatchInlineSnapshot(`""`);
+  });
+
+  it(`should reply with 500 and return empty when the "options.repositoryResolver" function throws`, async () => {
+    // Given
+    // the fastifyGitServerPlugin has been registered
+    app.register(fastifyGitServerPlugin, {
+      async authorize(_repoSlug, _cred) {
+        return false;
+      },
+      async repositoryResolver(_repoSlug) {
+        throw new Error("Test error");
+      },
+    });
+
+    // When
+    // a request with a bad requestType is made
+    const response = await app.inject({
+      remoteAddress: "localhost",
+      method: "GET",
+      url: "/org/repo.git/info/refs?service=git-upload-pack",
+      headers: {
+        authorization: "Basic dGVzdDp0ZXN0", // "test:test" base64-ized
+      },
+    });
+
+    // Then
+    expect(response.statusCode).toStrictEqual(500);
+    expect(response.body).toMatchInlineSnapshot(`""`);
+  });
+
   it(`should reply with 401 and a WWW-Authenticate header and return empty when GET /:org/:slug.git/info/refs?service=git-upload-pack is called and repositoryResolver returned with AuthMode.ALWAYS and no Authorization header is present`, async () => {
     // Given
     // the fastifyGitServerPlugin has been registered
@@ -162,72 +283,6 @@ describe("@ethicdevs/fastify-git-server", () => {
     expect(response.headers["www-authenticate"]).toMatchInlineSnapshot(
       `"Basic realm=\\"Git\\", charset=\\"UTF-8\\""`,
     );
-    expect(response.body).toMatchInlineSnapshot(`""`);
-  });
-
-  it(`should reply with 400 and return empty when POST /org/repo.git/git-receive-pack is called and repositoryResolver returned with AuthMode.NEVER or AuthMode.PUSH_ONLY and Authorization header is present but not a valid "Basic" auth token`, async () => {
-    // Given
-    // the fastifyGitServerPlugin has been registered
-    app.register(fastifyGitServerPlugin, {
-      async authorize(_repoSlug, cred) {
-        return cred.username === "test" && cred.password === "test";
-      },
-      async repositoryResolver(_repoSlug) {
-        return {
-          authMode: GitServer.AuthMode.PUSH_ONLY,
-          gitRepositoryDir: resolve(
-            join(__dirname, "__fixtures__", "test-git-repo-001"),
-          ),
-        };
-      },
-    });
-
-    // When
-    // a request for receiving git info refs is made
-    const response = await app.inject({
-      remoteAddress: "localhost",
-      method: "POST",
-      url: "/org/repo.git/git-receive-pack",
-      headers: {
-        authorization: "NotBasic dGVzdDp0ZXN0", // "test:test" base64-ized
-      },
-    });
-
-    // Then
-    expect(response.statusCode).toStrictEqual(400);
-    expect(response.body).toMatchInlineSnapshot(`""`);
-  });
-
-  it(`should reply with 403 and return empty when POST /org/repo.git/git-receive-pack is called and repositoryResolver returned with AuthMode.NEVER or AuthMode.PUSH_ONLY and Authorization header is present but auth token is invalid`, async () => {
-    // Given
-    // the fastifyGitServerPlugin has been registered
-    app.register(fastifyGitServerPlugin, {
-      async authorize(_repoSlug, cred) {
-        return cred.username === "test" && cred.password === "test";
-      },
-      async repositoryResolver(_repoSlug) {
-        return {
-          authMode: GitServer.AuthMode.PUSH_ONLY,
-          gitRepositoryDir: resolve(
-            join(__dirname, "__fixtures__", "test-git-repo-001"),
-          ),
-        };
-      },
-    });
-
-    // When
-    // a request for receiving git info refs is made
-    const response = await app.inject({
-      remoteAddress: "localhost",
-      method: "POST",
-      url: "/org/repo.git/git-receive-pack",
-      headers: {
-        authorization: "Basic NotValidToken",
-      },
-    });
-
-    // Then
-    expect(response.statusCode).toStrictEqual(403);
     expect(response.body).toMatchInlineSnapshot(`""`);
   });
 
@@ -307,6 +362,130 @@ describe("@ethicdevs/fastify-git-server", () => {
 `);
   });
 
+  it(`should reply with 200 and return empty when POST /:org/:slug.git/git-upload-pack is called and repositoryResolver returned with AuthMode.PUSH_ONLY and no Authorization header is present`, async () => {
+    // Given
+    // the fastifyGitServerPlugin has been registered
+    app.register(fastifyGitServerPlugin, {
+      async authorize(_repoSlug, cred) {
+        return cred.username === "test" && cred.password === "test";
+      },
+      async repositoryResolver(_repoSlug) {
+        return {
+          authMode: GitServer.AuthMode.PUSH_ONLY,
+          gitRepositoryDir: resolve(
+            join(__dirname, "__fixtures__", "test-git-repo-001"),
+          ),
+        };
+      },
+    });
+
+    // When
+    // a request for receiving git info refs is made
+    const response = await app.inject({
+      remoteAddress: "localhost",
+      method: "POST",
+      url: "/org/repo.git/git-upload-pack",
+      headers: {
+        authorization: "Basic dGVzdDp0ZXN0", // "test:test" base64-ized
+      },
+      payload: {
+        buffer: Buffer.from(
+          `0032want 0a53e9ddeaddad63ad106860237bbf53411d11a7
+0032have 441b40d833fdfa93eb2908e52742248faf0ee993
+0000`,
+        ),
+      },
+    });
+
+    // Then
+    expect(response.statusCode).toStrictEqual(200);
+    expect(response.body).toMatchInlineSnapshot(`""`);
+  });
+
+  it(`should reply with 401 and a WWW-Authenticate header and return empty when POST /:org/:slug.git/git-upload-pack is called and repositoryResolver returned with AuthMode.PUSH_ONLY and no Authorization header is present`, async () => {
+    // Given
+    // the fastifyGitServerPlugin has been registered
+    app.register(fastifyGitServerPlugin, {
+      async authorize(_repoSlug, _cred) {
+        return false;
+      },
+      async repositoryResolver(_repoSlug) {
+        return {
+          authMode: GitServer.AuthMode.ALWAYS,
+          gitRepositoryDir: resolve(
+            join(__dirname, "__fixtures__", "test-git-repo-001"),
+          ),
+        };
+      },
+    });
+
+    // When
+    // a request for receiving git info refs is made
+    const response = await app.inject({
+      remoteAddress: "localhost",
+      method: "POST",
+      url: "/org/repo.git/git-upload-pack",
+      payload: {
+        buffer: Buffer.from(
+          `0032want 0a53e9ddeaddad63ad106860237bbf53411d11a7
+0032have 441b40d833fdfa93eb2908e52742248faf0ee993
+0000`,
+        ),
+      },
+    });
+
+    // Then
+    expect(response.statusCode).toStrictEqual(401);
+    expect(response.headers["www-authenticate"]).toBeDefined();
+    expect(response.headers["www-authenticate"]).not.toBeNull();
+    expect(response.headers["www-authenticate"]).toMatchInlineSnapshot(
+      `"Basic realm=\\"Git\\", charset=\\"UTF-8\\""`,
+    );
+    expect(response.body).toMatchInlineSnapshot(`""`);
+  });
+
+  it(`should reply with 401 and a WWW-Authenticate header and return empty when POST /:org/:slug.git/git-upload-pack is called and repositoryResolver returned with AuthMode.PUSH_ONLY and no Authorization header is present`, async () => {
+    // Given
+    // the fastifyGitServerPlugin has been registered
+    app.register(fastifyGitServerPlugin, {
+      async authorize(_repoSlug, _cred) {
+        return false;
+      },
+      async repositoryResolver(_repoSlug) {
+        return {
+          authMode: GitServer.AuthMode.ALWAYS,
+          gitRepositoryDir: resolve(
+            join(__dirname, "__fixtures__", "test-git-repo-001"),
+          ),
+        };
+      },
+    });
+
+    // When
+    // a request for receiving git info refs is made
+    const response = await app.inject({
+      remoteAddress: "localhost",
+      method: "POST",
+      url: "/org/repo.git/git-upload-pack",
+      payload: {
+        buffer: Buffer.from(
+          `....0a53e9ddeaddad63ad106860237bbf53411d11a7 441b40d833fdfa93eb2908e52742248faf0ee993 refs/heads/maint\0 report-status
+0000
+PACK....`,
+        ),
+      },
+    });
+
+    // Then
+    expect(response.statusCode).toStrictEqual(401);
+    expect(response.headers["www-authenticate"]).toBeDefined();
+    expect(response.headers["www-authenticate"]).not.toBeNull();
+    expect(response.headers["www-authenticate"]).toMatchInlineSnapshot(
+      `"Basic realm=\\"Git\\", charset=\\"UTF-8\\""`,
+    );
+    expect(response.body).toMatchInlineSnapshot(`""`);
+  });
+
   it(`should reply with 401 and a WWW-Authenticate header and return empty when POST /:org/:slug.git/git-receive-pack is called and repositoryResolver returned with AuthMode.PUSH_ONLY and no Authorization header is present`, async () => {
     // Given
     // the fastifyGitServerPlugin has been registered
@@ -339,6 +518,72 @@ describe("@ethicdevs/fastify-git-server", () => {
     expect(response.headers["www-authenticate"]).toMatchInlineSnapshot(
       `"Basic realm=\\"Git\\", charset=\\"UTF-8\\""`,
     );
+    expect(response.body).toMatchInlineSnapshot(`""`);
+  });
+
+  it(`should reply with 400 and return empty when POST /org/repo.git/git-receive-pack is called and repositoryResolver returned with AuthMode.NEVER or AuthMode.PUSH_ONLY and Authorization header is present but not a valid "Basic" auth token`, async () => {
+    // Given
+    // the fastifyGitServerPlugin has been registered
+    app.register(fastifyGitServerPlugin, {
+      async authorize(_repoSlug, cred) {
+        return cred.username === "test" && cred.password === "test";
+      },
+      async repositoryResolver(_repoSlug) {
+        return {
+          authMode: GitServer.AuthMode.PUSH_ONLY,
+          gitRepositoryDir: resolve(
+            join(__dirname, "__fixtures__", "test-git-repo-001"),
+          ),
+        };
+      },
+    });
+
+    // When
+    // a request for receiving git info refs is made
+    const response = await app.inject({
+      remoteAddress: "localhost",
+      method: "POST",
+      url: "/org/repo.git/git-receive-pack",
+      headers: {
+        authorization: "NotBasic dGVzdDp0ZXN0", // "test:test" base64-ized
+      },
+    });
+
+    // Then
+    expect(response.statusCode).toStrictEqual(400);
+    expect(response.body).toMatchInlineSnapshot(`""`);
+  });
+
+  it(`should reply with 403 and return empty when POST /org/repo.git/git-receive-pack is called and repositoryResolver returned with AuthMode.NEVER or AuthMode.PUSH_ONLY and Authorization header is present but auth token is invalid`, async () => {
+    // Given
+    // the fastifyGitServerPlugin has been registered
+    app.register(fastifyGitServerPlugin, {
+      async authorize(_repoSlug, cred) {
+        return cred.username === "test" && cred.password === "test";
+      },
+      async repositoryResolver(_repoSlug) {
+        return {
+          authMode: GitServer.AuthMode.PUSH_ONLY,
+          gitRepositoryDir: resolve(
+            join(__dirname, "__fixtures__", "test-git-repo-001"),
+          ),
+        };
+      },
+    });
+
+    // When
+    // a request for receiving git info refs is made
+    const response = await app.inject({
+      remoteAddress: "localhost",
+      method: "POST",
+      url: "/org/repo.git/git-receive-pack",
+      headers: {
+        authorization: "Basic NotValidToken",
+      },
+    });
+
+    // Then
+    expect(response.statusCode).toStrictEqual(403);
     expect(response.body).toMatchInlineSnapshot(`""`);
   });
 });

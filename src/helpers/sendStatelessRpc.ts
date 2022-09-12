@@ -24,18 +24,4 @@ export function sendStatelessRpc(
 
   process.stdout.on("data", (chunk) => reply.raw.write(chunk));
   process.stdout.on("close", () => reply.raw.end());
-  process.stdout.on("error", (err) =>
-    reply.status(500).send({
-      message: err.message,
-      error: "Cannot send info refs",
-      statusCode: 500,
-    }),
-  );
-  process.stderr.on("error", (err) =>
-    reply.status(500).send({
-      message: err.message,
-      error: "Cannot send info refs",
-      statusCode: 500,
-    }),
-  );
 }
