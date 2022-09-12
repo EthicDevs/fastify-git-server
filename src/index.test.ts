@@ -1,7 +1,7 @@
-import lib from './index'
+import lib from "./index";
 
-describe('typescript-library-starter', () => {
-  test('testing works', () => {
-    expect(lib).toBe('Hello, World !')
-  })
-})
+describe("fastify-git-server", () => {
+  test("testing works", () => {
+    expect(lib).toBe("Hello, World !");
+  });
+});

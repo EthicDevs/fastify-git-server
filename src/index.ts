@@ -1,1 +1,5 @@
-export default 'Hello, World !'
+import { makePlugin } from "./pluginFactory";
+
+export { GitServer } from "./types";
+
+export default makePlugin();
