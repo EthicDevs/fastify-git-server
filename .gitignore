@@ -1,0 +1,8 @@
+!.env
+.env.*
+.DS_Store
+.volumes/
+dist/
+node_modules/
+yarn-error.log
+*.log
