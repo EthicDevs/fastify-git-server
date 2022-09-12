@@ -1,7 +1,8 @@
 // std
 import { PathLike } from "node:fs";
+import stream from "node:stream";
 // 3rd-party
-import type { FastifyReply, FastifyRequest } from "fastify";
+import type { FastifyRequest } from "fastify";
 // lib
 import { GIT_STATELESS_RPC_FLAG } from "../constants";
 import { GitServer } from "../types";
@@ -13,15 +14,13 @@ export function sendStatelessRpc(
   packType: GitServer.PackType,
   cwd: PathLike,
   request: FastifyRequest,
-  reply: FastifyReply,
+  gitStream: stream.PassThrough,
 ) {
   const safePackType = safeServiceToPackType(packType);
   const process = spawnGit(opts, [safePackType, GIT_STATELESS_RPC_FLAG], cwd);
 
-  reply.header("Content-Type", `application/x-git-${safePackType}-result`);
-
   request.raw.pipe(process.stdin, { end: false });
 
-  process.stdout.on("data", (chunk) => reply.raw.write(chunk));
-  process.stdout.on("close", () => reply.raw.end());
+  process.stdout.on("data", (chunk) => gitStream.write(chunk));
+  process.stdout.on("close", () => gitStream.end());
 }

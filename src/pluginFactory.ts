@@ -1,3 +1,5 @@
+// std
+import stream from "node:stream";
 // 3rd-party - fastify std
 import type { FastifyPluginAsync } from "fastify";
 import makeFastifyPlugin from "fastify-plugin";
@@ -126,11 +128,23 @@ const gitServerPluginAsync: FastifyPluginAsync<GitServer.PluginOptions> =
             }
           }
 
+          const gitStream = new stream.PassThrough();
+          gitStream.pipe(reply.raw);
+
           if (requestMethod === "GET" && requestType === GIT_INFO_REFS) {
             logInfo(
               `[git] sending info refs response for request "${request.id}"...`,
             );
-            sendInfoRefs(opts, packType, repoResult.gitRepositoryDir, reply);
+            reply.header(
+              "Content-Type",
+              `application/x-git-${packType}-advertisement`,
+            );
+            sendInfoRefs(
+              opts,
+              packType,
+              repoResult.gitRepositoryDir,
+              gitStream,
+            );
           } else if (
             requestMethod === "POST" &&
             GIT_POST_REQUEST_TYPES.includes(requestType)
@@ -138,12 +152,16 @@ const gitServerPluginAsync: FastifyPluginAsync<GitServer.PluginOptions> =
             logInfo(
               `[git] sending stateless rpc response for request "${request.id}"...`,
             );
+            reply.header(
+              "Content-Type",
+              `application/x-git-${packType}-result`,
+            );
             sendStatelessRpc(
               opts,
               packType,
               repoResult.gitRepositoryDir,
               request,
-              reply,
+              gitStream,
             );
           } else {
             logWarn(

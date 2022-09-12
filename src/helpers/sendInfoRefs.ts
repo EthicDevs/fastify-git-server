@@ -1,7 +1,6 @@
 // std
 import { PathLike } from "node:fs";
-// 3rd-party
-import type { FastifyReply } from "fastify";
+import stream from "node:stream";
 // lib
 import { GIT_ADVERTISE_REFS_FLAG, GIT_STATELESS_RPC_FLAG } from "../constants";
 import { GitServer } from "../types";
@@ -13,7 +12,7 @@ export function sendInfoRefs(
   opts: GitServer.PluginOptions,
   packType: GitServer.PackType,
   cwd: PathLike,
-  reply: FastifyReply,
+  gitStream: stream.PassThrough,
 ) {
   const safePackType = safeServiceToPackType(packType);
   const process = spawnGit(
@@ -22,18 +21,13 @@ export function sendInfoRefs(
     cwd,
   );
 
-  reply.header(
-    "Content-Type",
-    `application/x-git-${safePackType}-advertisement`,
-  );
-
-  reply.raw.write(
+  gitStream.write(
     getGitPackMagicCode(safePackType) +
       " service=git-" +
       safePackType +
       "\n0000",
   );
 
-  process.stdout.on("data", (chunk) => reply.raw.write(chunk));
-  process.stdout.on("close", () => reply.raw.end());
+  process.stdout.on("data", (chunk) => gitStream.write(chunk));
+  process.stdout.on("close", () => gitStream.end());
 }

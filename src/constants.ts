@@ -5,7 +5,7 @@ export const GIT_EXECUTABLE_DEFAULT = "git";
 export const GIT_STATELESS_RPC_FLAG = "--stateless-rpc";
 export const GIT_ADVERTISE_REFS_FLAG = "--advertise-refs";
 export const GIT_PATH_REGEXP = new RegExp(
-  /([A-Za-z]+)\/([A-Za-z]+)\.git\/(.+)/,
+  /([A-Za-z-]+)\/([A-Za-z-]+)\.git\/(.+)/i,
 );
 
 // supported git features
