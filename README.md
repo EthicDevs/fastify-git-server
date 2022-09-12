@@ -92,6 +92,26 @@ $ git commit -am 'docs(readme): add the date of today'
 $ git push
 ```
 
+## Contributing
+
+Contributions to this repository are welcome to everyone, please feel free to
+send a pull request for further review/discussion/merging/resolution. 👌
+
+### Run the tests
+
+```sh
+$ yarn test # run all tests
+$ yarn test --coverage # get coverage in ./coverage/lcov-report/index.html
+$ yarn test --coverage --watchAll # (dev) quick test iteration loop
+```
+
+### Build the lib
+
+```sh
+$ yarn build
+$ yarn typecheck # same but does not write to ./dist folder (only check types)
+```
+
 ## License
 
 The [MIT](/LICENSE) license.
