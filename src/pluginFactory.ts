@@ -117,10 +117,13 @@ const gitServerPluginAsync: FastifyPluginAsync<GitServer.PluginOptions> =
               .toString("utf-8")
               .split(":");
 
-            const authorizationResult = await opts.authorize(repoSlug, {
-              username,
-              password,
-            });
+            const authorizationResult = await opts.authorizationResolver(
+              repoSlug,
+              {
+                username,
+                password,
+              },
+            );
 
             if (authorizationResult !== true) {
               logWarn(`[git] bad authorization for request "${request.id}"...`);

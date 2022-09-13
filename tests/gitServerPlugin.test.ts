@@ -73,7 +73,7 @@ describe("@ethicdevs/fastify-git-server", () => {
     // Given
     // the fastifyGitServerPlugin has been registered
     app.register(fastifyGitServerPlugin, {
-      async authorize(_repoSlug, _cred) {
+      async authorizationResolver(_repoSlug, _cred) {
         return false;
       },
       async repositoryResolver(_repoSlug) {
@@ -103,7 +103,7 @@ describe("@ethicdevs/fastify-git-server", () => {
     // Given
     // the fastifyGitServerPlugin has been registered
     app.register(fastifyGitServerPlugin, {
-      async authorize(_repoSlug, _cred) {
+      async authorizationResolver(_repoSlug, _cred) {
         return false;
       },
       async repositoryResolver(_repoSlug) {
@@ -135,7 +135,7 @@ describe("@ethicdevs/fastify-git-server", () => {
     // Given
     // the fastifyGitServerPlugin has been registered
     app.register(fastifyGitServerPlugin, {
-      async authorize(_repoSlug, _cred) {
+      async authorizationResolver(_repoSlug, _cred) {
         return false;
       },
       async repositoryResolver(_repoSlug) {
@@ -165,7 +165,7 @@ describe("@ethicdevs/fastify-git-server", () => {
     // Given
     // the fastifyGitServerPlugin has been registered
     app.register(fastifyGitServerPlugin, {
-      async authorize(_repoSlug, _cred) {
+      async authorizationResolver(_repoSlug, _cred) {
         return false;
       },
       async repositoryResolver(_repoSlug) {
@@ -195,7 +195,7 @@ describe("@ethicdevs/fastify-git-server", () => {
     // Given
     // the fastifyGitServerPlugin has been registered
     app.register(fastifyGitServerPlugin, {
-      async authorize(_repoSlug, _cred) {
+      async authorizationResolver(_repoSlug, _cred) {
         return false;
       },
       async repositoryResolver(_repoSlug) {
@@ -221,11 +221,11 @@ describe("@ethicdevs/fastify-git-server", () => {
     expect(response.body).toMatchInlineSnapshot(`""`);
   });
 
-  it(`should reply with 500 and return empty when the "options.authorize" function throws`, async () => {
+  it(`should reply with 500 and return empty when the "options.authorizationResolver" function throws`, async () => {
     // Given
     // the fastifyGitServerPlugin has been registered
     app.register(fastifyGitServerPlugin, {
-      async authorize(_repoSlug, _cred) {
+      async authorizationResolver(_repoSlug, _cred) {
         throw new Error("Test error");
       },
       async repositoryResolver(_repoSlug) {
@@ -258,7 +258,7 @@ describe("@ethicdevs/fastify-git-server", () => {
     // Given
     // the fastifyGitServerPlugin has been registered
     app.register(fastifyGitServerPlugin, {
-      async authorize(_repoSlug, _cred) {
+      async authorizationResolver(_repoSlug, _cred) {
         return false;
       },
       async repositoryResolver(_repoSlug) {
@@ -286,7 +286,7 @@ describe("@ethicdevs/fastify-git-server", () => {
     // Given
     // the fastifyGitServerPlugin has been registered
     app.register(fastifyGitServerPlugin, {
-      async authorize(_repoSlug, _cred) {
+      async authorizationResolver(_repoSlug, _cred) {
         return false;
       },
       async repositoryResolver(_repoSlug) {
@@ -321,7 +321,7 @@ describe("@ethicdevs/fastify-git-server", () => {
     // Given
     // the fastifyGitServerPlugin has been registered
     app.register(fastifyGitServerPlugin, {
-      async authorize(_repoSlug, _cred) {
+      async authorizationResolver(_repoSlug, _cred) {
         return false;
       },
       async repositoryResolver(_repoSlug) {
@@ -361,7 +361,7 @@ describe("@ethicdevs/fastify-git-server", () => {
     // Given
     // the fastifyGitServerPlugin has been registered
     app.register(fastifyGitServerPlugin, {
-      async authorize(_repoSlug, cred) {
+      async authorizationResolver(_repoSlug, cred) {
         return cred.username === "test" && cred.password === "test";
       },
       async repositoryResolver(_repoSlug) {
@@ -407,7 +407,7 @@ describe("@ethicdevs/fastify-git-server", () => {
     // Given
     // the fastifyGitServerPlugin has been registered
     app.register(fastifyGitServerPlugin, {
-      async authorize(_repoSlug, cred) {
+      async authorizationResolver(_repoSlug, cred) {
         return cred.username === "test" && cred.password === "test";
       },
       async repositoryResolver(_repoSlug) {
@@ -447,7 +447,7 @@ describe("@ethicdevs/fastify-git-server", () => {
     // Given
     // the fastifyGitServerPlugin has been registered
     app.register(fastifyGitServerPlugin, {
-      async authorize(_repoSlug, _cred) {
+      async authorizationResolver(_repoSlug, _cred) {
         return false;
       },
       async repositoryResolver(_repoSlug) {
@@ -489,7 +489,7 @@ describe("@ethicdevs/fastify-git-server", () => {
     // Given
     // the fastifyGitServerPlugin has been registered
     app.register(fastifyGitServerPlugin, {
-      async authorize(_repoSlug, _cred) {
+      async authorizationResolver(_repoSlug, _cred) {
         return false;
       },
       async repositoryResolver(_repoSlug) {
@@ -531,7 +531,7 @@ PACK....`,
     // Given
     // the fastifyGitServerPlugin has been registered
     app.register(fastifyGitServerPlugin, {
-      async authorize(_repoSlug, _cred) {
+      async authorizationResolver(_repoSlug, _cred) {
         return false;
       },
       async repositoryResolver(_repoSlug) {
@@ -566,7 +566,7 @@ PACK....`,
     // Given
     // the fastifyGitServerPlugin has been registered
     app.register(fastifyGitServerPlugin, {
-      async authorize(_repoSlug, cred) {
+      async authorizationResolver(_repoSlug, cred) {
         return cred.username === "test" && cred.password === "test";
       },
       async repositoryResolver(_repoSlug) {
@@ -599,7 +599,7 @@ PACK....`,
     // Given
     // the fastifyGitServerPlugin has been registered
     app.register(fastifyGitServerPlugin, {
-      async authorize(_repoSlug, cred) {
+      async authorizationResolver(_repoSlug, cred) {
         return cred.username === "test" && cred.password === "test";
       },
       async repositoryResolver(_repoSlug) {

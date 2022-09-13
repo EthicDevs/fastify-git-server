@@ -40,7 +40,8 @@
   },
   "dependencies": {
     "debug": "^4.3.4",
-    "fastify-plugin": "^3.0.1"
+    "fastify-plugin": "^3.0.1",
+    "git-side-band-message": "^0.0.3"
   },
   "devDependencies": {
     "@babel/core": ">=7.0.0-beta.0 <8",

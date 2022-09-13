@@ -1,5 +1,6 @@
 // std
 import type { PathLike } from "node:fs";
+import { GitServerMessage } from "./helpers/GitServerMessage";
 
 export namespace GitServer {
   export enum PackType {
@@ -24,15 +25,46 @@ export namespace GitServer {
   }
 
   export interface PluginOptions {
-    gitExecutablePath?: PathLike;
-
-    authorize(
+    /**
+     * A method that allow to provide custom business logic to resolve
+     * authorisation.
+     */
+    authorizationResolver(
       repoSlug: string,
       credentials: GitServer.AuthCredentials,
     ): PromiseLike<boolean>;
-
+    /**
+     * A method that allow to provide custom business logic to resolve
+     * repository's metas.
+     */
     repositoryResolver(
       repoSlug: string,
     ): PromiseLike<GitServer.RepositoryResolverResult>;
+
+    /* optional config properties */
+
+    /**
+     * A path to the desired git binary file. If unset, will directly call `git`
+     * from the `$PATH`.
+     * @default: undefined
+     */
+    gitExecutablePath?: PathLike;
+    /**
+     * Whether or not to enable support for `git-side-band-message` to allow
+     * writing to the output stream while the client is performing fetch/push.
+     * @default: false
+     */
+    withSideBandMessages?: boolean;
+
+    /**
+     * A callback that will be called whenever a client is performing a fetch
+     * operation.
+     */
+    onFetch?: (gitServerMessage: GitServerMessage) => void;
+    /**
+     * A callback that will be called whenever a client is performing a push
+     * operation.
+     */
+    onPush?: (gitServerMessage: GitServerMessage) => void;
   }
 }
