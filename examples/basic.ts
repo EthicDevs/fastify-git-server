@@ -22,8 +22,10 @@ async function main() {
   server.register(fastifyGitServer, {
     // can be set to a path to git, else will directly call "git" from $PATH.
     gitExecutablePath: undefined,
+    // if true, allows you to send message when client fetch/push to the git server.
+    withSideBandMessages: true,
     // a method to authorise the fact that the user can fetch/push, or not.
-    async authorize(repoSlug, credentials) {
+    async authorizationResolver(repoSlug, credentials) {
       if (repoSlug.toLowerCase() === "testorg/test-repo") {
         return (
           credentials.username === "test" && credentials.password === "test"
@@ -40,6 +42,13 @@ async function main() {
         authMode: GitServer.AuthMode.ALWAYS, // or PUSH_ONLY, or NEVER.
         gitRepositoryDir: resolve(join(__dirname, "..")),
       };
+    },
+    // a callback that is called when client push to the git server.
+    onPush: (push) => {
+      push.write("\n");
+      push.write("Hey from the server 🖖\n\n");
+      // to cancel transmission:
+      // push.end("transmission complete 😎\n");
     },
   });
 

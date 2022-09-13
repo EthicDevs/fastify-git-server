@@ -36,8 +36,10 @@ async function main() {
   server.register(fastifyGitServer, {
     // can be set to a path to git, else will directly call "git" from $PATH.
     gitExecutablePath: undefined,
-    // a method to authorise the fact that the user can fetch/push, or not.
-    async authorize(repoSlug, credentials) {
+    // if true, allows you to send message when client fetch/push to the git server.
+    withSideBandMessages: true,
+    // a custom resolver to resolve authorisation.
+    async authorizationResolver(repoSlug, credentials) {
       if (repoSlug.toLowerCase() === "testorg/test-repo") {
         return (
           credentials.username === "test" && credentials.password === "test"
@@ -45,7 +47,7 @@ async function main() {
       }
       return false;
     },
-    // a method to resolve the repository directory on disk and its authorisation mode.
+    // a custom resolver to resolve the repository metas.
     async repositoryResolver(repoSlug) {
       if (repoSlug !== "testorg/test-repo") {
         throw new Error("Cannot find such repository.");
@@ -56,6 +58,12 @@ async function main() {
           "/home/git-server-user/repos/testorg/test-repo",
         ),
       };
+    },
+    onPush: (push) => {
+      push.write("\n");
+      push.write("Hey from the server 🖖\n\n");
+      // to cancel transmission:
+      // push.end("transmission complete 😎\n");
     },
   });
 
