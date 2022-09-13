@@ -10,9 +10,9 @@ export class GitServerMessage {
     this.stream = stream;
   }
 
-  public end(msg: string) {
+  public end(msg?: string) {
     // must be called at the end
-    if (msg) {
+    if (msg != null) {
       this.write(msg);
     }
     return this.stream.end("00000000");
@@ -20,12 +20,12 @@ export class GitServerMessage {
 
   public write(msg: string) {
     // \2 is a verbose message as defined in the git protocol
-    return this.stream.write(encodeSideBandMessage(msg, "\u0002"));
+    return this.stream.write(encodeSideBandMessage(msg));
   }
 
   public error(msg: string) {
     // \3 is an error message as defined in the git protocol
-    this.stream.write(encodeSideBandMessage(msg, "\u0003"));
+    this.stream.write(encodeSideBandMessage(msg, Buffer.from("\u0003")));
     return this.end;
   }
 }

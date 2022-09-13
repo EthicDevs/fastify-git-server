@@ -56,15 +56,18 @@ export namespace GitServer {
      */
     withSideBandMessages?: boolean;
 
-    /**
-     * A callback that will be called whenever a client is performing a fetch
-     * operation.
-     */
-    onFetch?: (gitServerMessage: GitServerMessage) => void;
+    /* optional config callbacks */
+
     /**
      * A callback that will be called whenever a client is performing a push
      * operation.
      */
     onPush?: (gitServerMessage: GitServerMessage) => void;
+    /**
+     * A callback that will be called whenever a client is performing a fetch
+     * operation.
+     * @note this callback does not gets called yet (as opposed to onPush).
+     */
+    onFetch?: (gitServerMessage: GitServerMessage) => void;
   }
 }

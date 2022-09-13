@@ -1,9 +1,9 @@
 /**
  * Run me using command:
- * $ yarn ts-node basic.ts # (dev) quick command to transpile/run
+ * $ yarn ts-node side-band-msg.ts # (dev) quick command to transpile/run
  *
  * Or transpile me into JS then launch me using:
- * $ node basic.ts # (prod) once you have configured *pack, run
+ * $ node side-band-msg.ts # (prod) once you have configured *pack, run
  */
 
 // std
@@ -20,6 +20,10 @@ async function main() {
   const server = fastify();
 
   server.register(fastifyGitServer, {
+    // can be set to a path to git, else will directly call "git" from $PATH.
+    gitExecutablePath: undefined,
+    // if true, allows you to send message when client fetch/push to the git server.
+    withSideBandMessages: true,
     // a method to authorise the fact that the user can fetch/push, or not.
     async authorizationResolver(repoSlug, credentials) {
       if (repoSlug.toLowerCase() === "testorg/test-repo") {
@@ -38,6 +42,10 @@ async function main() {
         authMode: GitServer.AuthMode.ALWAYS, // or PUSH_ONLY, or NEVER.
         gitRepositoryDir: resolve(join(__dirname, "..")),
       };
+    },
+    // a callback that is called when client push to the git server.
+    onPush: (sideBand) => {
+      sideBand.write("\nonPush called!\n\n");
     },
   });
 
