@@ -174,31 +174,29 @@ const gitServerPluginAsync: FastifyPluginAsync<GitServer.PluginOptions> =
                 requestType,
                 username: authCredentials?.username || null,
               });
-            } catch (_sendError) {
-              const sendError = _sendError as Error;
+            } catch (err) {
+              const error = err as Error;
               logWarn(
-                `[git] onPush callback denied request "${request.id}" with error: ${sendError.message}.`,
+                `[git] onPush callback denied request "${request.id}" with error: ${error.message}.`,
               );
-              gitStream.end();
-              return reply.status(400).send(sendError.message);
+              return reply.status(400).send(error.message);
             }
           } else {
             logWarn(
               `[git] unknown method and/or request type specified in request "${request.id}".`,
             );
-            gitStream.end();
             return reply.status(400).send();
           }
 
           logInfo(`[git] request "${request.id}" was handled.`);
-          gitStream.end();
           return reply;
         } catch (err) {
+          const error = err as Error;
           logWarn(
             `[git] something went wrong with request "${request.id}".`,
             err,
           );
-          return reply.status(500).send();
+          return reply.status(500).send(error.message);
         }
       });
 
