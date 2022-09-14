@@ -23,7 +23,12 @@ export function sendStatelessRpc(
 
     let gitServerMessage: GitServerMessage | null =
       opts.withSideBandMessages === true
-        ? new GitServerMessage(gitStream)
+        ? new GitServerMessage({
+            gitRepositoryDir: cwd,
+            packType: safePackType,
+            request: request,
+            stream: gitStream,
+          })
         : null;
 
     request.raw.pipe(process.stdin, { end: false });
