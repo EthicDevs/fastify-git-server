@@ -1,5 +1,8 @@
 export const FASTIFY_VERSION_TARGET = "3.x";
 
+// hooks
+export const ON_PUSH_TIMEOUT_MS = 30 * 1000; // 30s before auto-denying timeout
+
 // git commands/flags related
 export const GIT_EXECUTABLE_DEFAULT = "git";
 export const GIT_STATELESS_RPC_FLAG = "--stateless-rpc";

@@ -162,26 +162,38 @@ const gitServerPluginAsync: FastifyPluginAsync<GitServer.PluginOptions> =
             reply.raw.writeHead(200, "OK", {
               "content-type": `application/x-git-${packType}-result`,
             });
-            await sendStatelessRpc({
-              cwd: repoResult.gitRepositoryDir,
-              gitStream,
-              opts,
-              packType,
-              repoSlug,
-              request,
-              requestMethod,
-              requestType,
-              username: authCredentials?.username || null,
-            });
+
+            try {
+              await sendStatelessRpc({
+                cwd: repoResult.gitRepositoryDir,
+                gitStream,
+                opts,
+                packType,
+                repoSlug,
+                request,
+                requestMethod,
+                requestType,
+                username: authCredentials?.username || null,
+              });
+            } catch (_sendError) {
+              const sendError = _sendError as Error;
+              logWarn(
+                `[git] onPush callback denied request "${request.id}" with error: ${sendError.message}.`,
+              );
+              gitStream.end();
+              return reply.status(400).send(sendError.message);
+            }
           } else {
             logWarn(
               `[git] unknown method and/or request type specified in request "${request.id}".`,
             );
+            gitStream.end();
             return reply.status(400).send();
           }
 
           logInfo(`[git] request "${request.id}" was handled.`);
-          return reply;
+          gitStream.end();
+          return reply.send();
         } catch (err) {
           logWarn(
             `[git] something went wrong with request "${request.id}".`,

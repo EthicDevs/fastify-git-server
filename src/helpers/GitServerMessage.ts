@@ -4,10 +4,14 @@ import { PassThrough } from "node:stream";
 import { default as encodeSideBandMessage } from "git-side-band-message";
 
 export class GitServerMessage {
-  public stream: PassThrough;
-
-  constructor(stream: PassThrough) {
+  constructor(
+    public stream: PassThrough,
+    public accept: () => void,
+    public deny: (reason: string) => void,
+  ) {
     this.stream = stream;
+    this.accept = accept;
+    this.deny = deny;
   }
 
   public end(msg?: string) {
