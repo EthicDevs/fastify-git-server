@@ -46,14 +46,12 @@ export function sendStatelessRpc({
 
         const accept = () => {
           onPushPerfomedAction = true;
-          resolve(undefined);
-          return undefined;
+          return resolve(undefined);
         };
 
         const deny = (reason: string) => {
           onPushPerfomedAction = true;
-          reject(new Error(reason));
-          return undefined;
+          return reject(new Error(reason));
         };
 
         // protect against miss-implemented onPush by automatically denying the
@@ -62,8 +60,9 @@ export function sendStatelessRpc({
           if (autoDenyTimeoutId != null) {
             clearTimeout(autoDenyTimeoutId);
             autoDenyTimeoutId = null;
+            return undefined;
           }
-          deny(
+          return deny(
             `onPush did not respond within the allowed ${ON_PUSH_TIMEOUT_MS} seconds.`,
           );
         }, ON_PUSH_TIMEOUT_MS);
@@ -86,8 +85,9 @@ export function sendStatelessRpc({
         autoDenyTimeoutId = null;
 
         if (onPushPerfomedAction === false) {
-          accept();
+          resolve(undefined);
         }
+        // else its been resolved/rejected in accept/deny
       } else {
         resolve(undefined);
       }

@@ -162,7 +162,6 @@ const gitServerPluginAsync: FastifyPluginAsync<GitServer.PluginOptions> =
             reply.raw.writeHead(200, "OK", {
               "content-type": `application/x-git-${packType}-result`,
             });
-
             try {
               await sendStatelessRpc({
                 cwd: repoResult.gitRepositoryDir,
@@ -193,7 +192,7 @@ const gitServerPluginAsync: FastifyPluginAsync<GitServer.PluginOptions> =
 
           logInfo(`[git] request "${request.id}" was handled.`);
           gitStream.end();
-          return reply.send();
+          return reply;
         } catch (err) {
           logWarn(
             `[git] something went wrong with request "${request.id}".`,
