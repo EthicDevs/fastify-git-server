@@ -1,5 +1,8 @@
 // std
 import type { PathLike } from "node:fs";
+// 3rd-party
+import { FastifyRequest, HTTPMethods } from "fastify";
+// lib
 import { GitServerMessage } from "./helpers/GitServerMessage";
 
 export namespace GitServer {
@@ -22,6 +25,20 @@ export namespace GitServer {
   export interface RepositoryResolverResult {
     authMode: GitServer.AuthMode;
     gitRepositoryDir: PathLike;
+  }
+
+  export interface Event {
+    type: "fetch" | "push";
+    message: GitServerMessage;
+    data: {
+      packType: GitServer.PackType;
+      repoDiskPath: PathLike;
+      repoSlug: string;
+      request: FastifyRequest;
+      requestMethod: HTTPMethods;
+      requestType: string;
+      username: string | null;
+    };
   }
 
   export interface PluginOptions {
@@ -62,12 +79,12 @@ export namespace GitServer {
      * A callback that will be called whenever a client is performing a push
      * operation.
      */
-    onPush?: (gitServerMessage: GitServerMessage) => void;
+    onPush?: (event: GitServer.Event) => void;
     /**
      * A callback that will be called whenever a client is performing a fetch
      * operation.
      * @note this callback does not gets called yet (as opposed to onPush).
      */
-    onFetch?: (gitServerMessage: GitServerMessage) => void;
+    onFetch?: (event: GitServer.Event) => void;
   }
 }

@@ -83,6 +83,8 @@ const gitServerPluginAsync: FastifyPluginAsync<GitServer.PluginOptions> =
           const repoResult = await opts.repositoryResolver(repoSlug);
           logTrace("repoResult:", repoResult);
 
+          let authCredentials: null | GitServer.AuthCredentials = null;
+
           if (
             repoResult.authMode !== GitServer.AuthMode.NEVER &&
             (repoResult.authMode === GitServer.AuthMode.ALWAYS ||
@@ -117,16 +119,19 @@ const gitServerPluginAsync: FastifyPluginAsync<GitServer.PluginOptions> =
               .toString("utf-8")
               .split(":");
 
+            authCredentials = {
+              username,
+              password,
+            };
+
             const authorizationResult = await opts.authorizationResolver(
               repoSlug,
-              {
-                username,
-                password,
-              },
+              authCredentials,
             );
 
             if (authorizationResult !== true) {
               logWarn(`[git] bad authorization for request "${request.id}"...`);
+              authCredentials = null;
               return reply.status(403).send();
             }
           }
@@ -157,13 +162,17 @@ const gitServerPluginAsync: FastifyPluginAsync<GitServer.PluginOptions> =
             reply.raw.writeHead(200, "OK", {
               "content-type": `application/x-git-${packType}-result`,
             });
-            await sendStatelessRpc(
+            await sendStatelessRpc({
+              cwd: repoResult.gitRepositoryDir,
+              gitStream,
               opts,
               packType,
-              repoResult.gitRepositoryDir,
+              repoSlug,
               request,
-              gitStream,
-            );
+              requestMethod,
+              requestType,
+              username: authCredentials?.username || null,
+            });
           } else {
             logWarn(
               `[git] unknown method and/or request type specified in request "${request.id}".`,
