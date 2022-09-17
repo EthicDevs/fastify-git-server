@@ -17,6 +17,7 @@ import {
 import { getPackType } from "./helpers/getPackType";
 import { sendInfoRefs } from "./helpers/sendInfoRefs";
 import { sendStatelessRpc } from "./helpers/sendStatelessRpc";
+import { spawnGit } from "./helpers/spawnGit";
 
 const logInfo = debug("fastifyGitServer:info");
 const logTrace = debug("fastifyGitServer:trace");
@@ -26,6 +27,15 @@ const logError = debug("fastifyGitServer:error");
 const gitServerPluginAsync: FastifyPluginAsync<GitServer.PluginOptions> =
   async (server, opts) => {
     try {
+      const spawnGitCommand: GitServer.SpawnGitCommandDecorator = (
+        args,
+        gitRepositoryDir,
+      ) => {
+        return spawnGit(opts, args, gitRepositoryDir);
+      };
+
+      server.decorateRequest("spawnGitCommand", spawnGitCommand);
+
       server.addHook("onRequest", async (request, reply) => {
         try {
           logInfo(`[git] handling request "${request.id}"...`);

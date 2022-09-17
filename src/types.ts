@@ -1,7 +1,9 @@
 // std
 import type { PathLike } from "node:fs";
+import type { ChildProcessWithoutNullStreams } from "node:child_process";
 // 3rd-party
-import { FastifyRequest, HTTPMethods } from "fastify";
+import type { FastifyRequest } from "fastify";
+import type { HTTPMethods } from "fastify/types/utils";
 // lib
 import { GitServerMessage } from "./helpers/GitServerMessage";
 
@@ -87,4 +89,9 @@ export namespace GitServer {
      */
     onFetch?: (event: GitServer.Event) => void;
   }
+
+  export type SpawnGitCommandDecorator = (
+    args: string[],
+    gitRepositoryDir: PathLike,
+  ) => ChildProcessWithoutNullStreams;
 }
