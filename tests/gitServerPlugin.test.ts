@@ -221,7 +221,7 @@ describe("@ethicdevs/fastify-git-server", () => {
     expect(response.body).toMatchInlineSnapshot(`""`);
   });
 
-  it(`should reply with 500 and return empty when the "options.authorizationResolver" function throws`, async () => {
+  it(`should reply with 500 and return an error when the "options.authorizationResolver" function throws`, async () => {
     // Given
     // the fastifyGitServerPlugin has been registered
     app.register(fastifyGitServerPlugin, {
@@ -251,10 +251,10 @@ describe("@ethicdevs/fastify-git-server", () => {
 
     // Then
     expect(response.statusCode).toStrictEqual(500);
-    expect(response.body).toMatchInlineSnapshot(`""`);
+    expect(response.body).toMatchInlineSnapshot(`"Test error"`);
   });
 
-  it(`should reply with 500 and return empty when the "options.repositoryResolver" function throws`, async () => {
+  it(`should reply with 500 and return an error when the "options.repositoryResolver" function throws`, async () => {
     // Given
     // the fastifyGitServerPlugin has been registered
     app.register(fastifyGitServerPlugin, {
@@ -279,7 +279,7 @@ describe("@ethicdevs/fastify-git-server", () => {
 
     // Then
     expect(response.statusCode).toStrictEqual(500);
-    expect(response.body).toMatchInlineSnapshot(`""`);
+    expect(response.body).toMatchInlineSnapshot(`"Test error"`);
   });
 
   it(`should reply with 401 and a WWW-Authenticate header and return empty when GET /:org/:slug.git/info/refs?service=git-upload-pack is called and repositoryResolver returned with AuthMode.ALWAYS and no Authorization header is present`, async () => {
