@@ -5,7 +5,12 @@ import stream from "node:stream";
 import type { FastifyRequest } from "fastify";
 import debug from "debug";
 // lib
-import { GIT_STATELESS_RPC_FLAG, ON_PUSH_TIMEOUT_MS } from "../constants";
+import {
+  GIT_PACK_REGEXP,
+  GIT_PACK_SEPARATOR,
+  GIT_STATELESS_RPC_FLAG,
+  ON_PUSH_TIMEOUT_MS,
+} from "../constants";
 import { GitServer } from "../types";
 import { GitServerMessage } from "./GitServerMessage";
 import { safeServiceToPackType } from "./safeServiceToPackType";
@@ -39,10 +44,11 @@ export function sendStatelessRpc({
     const safePackType = safeServiceToPackType(packType);
     const process = spawnGitCmd([safePackType, GIT_STATELESS_RPC_FLAG]);
 
+    let receiveBuffer = [] as string[];
+    request.raw.on("data", (chunk) => receiveBuffer.push(chunk));
     request.raw.pipe(process.stdin, { end: false });
 
     process.stdout.on("data", (chunk) => gitStream.write(chunk));
-
     process.stdout.once("data", () => {
       if (opts.withSideBandMessages === true && opts.onPush != null) {
         let onPushPerfomedAction: boolean = false;
@@ -77,13 +83,32 @@ export function sendStatelessRpc({
           );
         }, ON_PUSH_TIMEOUT_MS);
 
+        const received = Buffer.from(receiveBuffer.join(""))
+          .toString("utf-8")
+          .split(GIT_PACK_SEPARATOR);
+
+        const receivedMatches = received[0].match(GIT_PACK_REGEXP);
+        let payload: GitServer.EventPayload | null = null;
+
+        if (receivedMatches != null && Array.isArray(receivedMatches)) {
+          payload = {
+            commitId: receivedMatches[2],
+            treeId: receivedMatches[1],
+            refType: receivedMatches[3].replace(/s$/, "") as "head" | "tag",
+            refName: receivedMatches[4],
+            binary: Buffer.from(received[1], "utf-8"),
+            metas: receivedMatches[5].split(" ").map((meta) => meta.split("=")),
+          };
+        }
+
         // ask client for resolution about what to do + possibility to write to
         // the side band messages stream.
         opts.onPush({
-          type: "push",
+          type: GitServer.EventType.PUSH,
           message: new GitServerMessage(gitStream, accept, deny),
           data: {
             packType,
+            payload,
             repoDiskPath: cwd,
             repoSlug,
             request,

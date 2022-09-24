@@ -29,10 +29,25 @@ export namespace GitServer {
     gitRepositoryDir: PathLike;
   }
 
+  export enum EventType {
+    FETCH = "fetch",
+    PUSH = "push",
+  }
+
+  export interface EventPayload {
+    binary: Buffer;
+    commitId: string;
+    metas: string[][];
+    refType: "head" | "tag";
+    refName: string;
+    treeId: string;
+  }
+
   export interface Event {
-    type: "fetch" | "push";
+    type: EventType;
     message: GitServerMessage;
     data: {
+      payload: null | GitServer.EventPayload;
       packType: GitServer.PackType;
       repoDiskPath: PathLike;
       repoSlug: string;

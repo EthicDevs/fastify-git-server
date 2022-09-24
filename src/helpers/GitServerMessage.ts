@@ -2,6 +2,8 @@
 import { PassThrough } from "node:stream";
 // 3rd-party
 import { default as encodeSideBandMessage } from "git-side-band-message";
+// app
+import { GIT_SIDEBAND_END_OPCODE, GIT_SIDEBAND_TYPE_ERR } from "../constants";
 
 export class GitServerMessage {
   public stream: PassThrough;
@@ -23,7 +25,7 @@ export class GitServerMessage {
     if (msg != null) {
       this.write(msg);
     }
-    return this.stream.end("00000000");
+    return this.stream.end(GIT_SIDEBAND_END_OPCODE);
   }
 
   public write(msg: string) {
@@ -33,7 +35,9 @@ export class GitServerMessage {
 
   public error(msg: string) {
     // \3 is an error message as defined in the git protocol
-    this.stream.write(encodeSideBandMessage(msg, Buffer.from("\u0003")));
+    this.stream.write(
+      encodeSideBandMessage(msg, Buffer.from(GIT_SIDEBAND_TYPE_ERR)),
+    );
     return this.end;
   }
 }
