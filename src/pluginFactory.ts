@@ -11,7 +11,6 @@ import {
   GIT_INFO_REFS,
   GIT_PATH_REGEXP,
   GIT_POST_REQUEST_TYPES,
-  GIT_RECEIVE_PACK,
   SUPPORTED_GIT_REQUEST_TYPES,
 } from "./constants";
 import { getPackType } from "./helpers/getPackType";
@@ -98,7 +97,7 @@ const gitServerPluginAsync: FastifyPluginAsync<GitServer.PluginOptions> =
           if (
             repoResult.authMode !== GitServer.AuthMode.NEVER &&
             (repoResult.authMode === GitServer.AuthMode.ALWAYS ||
-              (requestType === GIT_RECEIVE_PACK &&
+              (packType === GitServer.PackType.RECEIVE &&
                 repoResult.authMode === GitServer.AuthMode.PUSH_ONLY))
           ) {
             const authorization = request.headers["authorization"];
